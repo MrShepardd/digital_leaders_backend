@@ -10,6 +10,8 @@ from .db_utilities.district_filler import DistrictFiller
 from .db_utilities.crowded_place_filler import CrowdedPlaceFiller
 from .db_utilities.atm_filler import AtmFiller
 from .db_utilities.atm_crowded_place_filler import AtmCrowdedPlaceFiller
+from .db_utilities.polygons_filler import PolygonFiller
+from .db_utilities.people_flow_filler import PeopleFlowFiller
 
 from .mercury.general_review import GeneralReview
 
@@ -111,12 +113,14 @@ def refill_db(production=True):
     db_filler.add_instance(AtmFiller(prefix=prefix))
     db_filler.add_instance(CrowdedPlaceFiller(prefix=prefix))
     db_filler.add_instance(AtmCrowdedPlaceFiller(prefix=prefix))
+    db_filler.add_instance(PolygonFiller(prefix=prefix))
+    db_filler.add_instance(PeopleFlowFiller(prefix=prefix))
+
     db_filler.refill()
 
     print(str(datetime.datetime.now()) + '; end: refill_db')
 
     return HttpResponse("Hello, world. You're at the polls index.")
-
 
 
 def make_pre_calculation(production=True):

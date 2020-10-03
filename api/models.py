@@ -42,14 +42,14 @@ class District(models.Model):
     geometry = models.TextField(default="")
 
 
-class Polygons(models.Model):
+class Polygon(models.Model):
     square_id = models.CharField(max_length=200)
     district = models.ForeignKey(District, on_delete=models.CASCADE, default=0)
     wkt_geo = models.TextField(default="")
 
 
 class PeopleFlow(models.Model):
-    square_id = models.ForeignKey(Polygons, on_delete=models.CASCADE, default=0)
+    square_id = models.ForeignKey(Polygon, on_delete=models.CASCADE, default=0)
     sex = models.IntegerField(default=-1)
     age_min = models.IntegerField(default=-1)
     age_max = models.IntegerField(default=-1)
