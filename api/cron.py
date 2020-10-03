@@ -10,7 +10,7 @@ from .db_utilities.district_filler import DistrictFiller
 from .db_utilities.crowded_place_filler import CrowdedPlaceFiller
 from .db_utilities.atm_filler import AtmFiller
 from .db_utilities.atm_crowded_place_filler import AtmCrowdedPlaceFiller
-from .db_utilities.polygons_filler import PolygonFiller
+from .db_utilities.polygon_filler import PolygonFiller
 from .db_utilities.people_flow_filler import PeopleFlowFiller
 
 from .mercury.general_review import GeneralReview
