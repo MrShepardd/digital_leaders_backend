@@ -29,6 +29,7 @@ class AtmCrowdedPlace(models.Model):
     id_place = models.ForeignKey(CrowdedPlace, on_delete=models.CASCADE, default=0)
     distance = models.FloatField(default=0.0)
     measure = models.CharField(max_length=200)
+    multi_line_string = models.TextField(default="")
 
 
 class District(models.Model):

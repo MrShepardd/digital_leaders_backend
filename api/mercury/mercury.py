@@ -7,5 +7,7 @@ class Mercury:
         self.gr = GeneralReview()
 
     def get_general_review(self):
-        # self.res['get_social_graph'] = self.sgr.get_social_graph()
+        # self.res['get_atm_location'] = self.gr.get_atm_location()
+        self.res['get_crowded_places'] = self.gr.get_crowded_places()
+        # self.res['get_path_crowded_places'] = self.gr.get_path_crowded_places()
         return self.res
