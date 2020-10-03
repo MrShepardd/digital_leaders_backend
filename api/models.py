@@ -40,3 +40,19 @@ class District(models.Model):
     lat = models.FloatField(default=-1.0)
     lon = models.FloatField(default=-1.0)
     geometry = models.TextField(default="")
+
+
+class Polygons(models.Model):
+    square_id = models.CharField(max_length=200)
+    district = models.ForeignKey(District, on_delete=models.CASCADE, default=0)
+    wkt_geo = models.TextField(default="")
+
+
+class PeopleFlow(models.Model):
+    square_id = models.ForeignKey(Polygons, on_delete=models.CASCADE, default=0)
+    sex = models.IntegerField(default=-1)
+    age_min = models.IntegerField(default=-1)
+    age_max = models.IntegerField(default=-1)
+    date = models.DateField()
+    time = models.TimeField()
+    abnt_cnt = models.FloatField(default=0.0)
