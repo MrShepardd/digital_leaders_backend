@@ -1,7 +1,4 @@
 from django.http import JsonResponse
-from .science.science import Science
-
-from api.cron import refill_db, download_all_atm, download_all_district, download_all_stops
 
 user_obj = {
     'id': 1,
@@ -10,8 +7,7 @@ user_obj = {
 }
 
 allowed_pages = [
-    'dashboard', 'authors', 'citation', 'magazines', 'knowledge', 'affiliations', 'developing', 'profile',
-    'graph'
+    'dashboard'
 ]
 
 
@@ -25,8 +21,5 @@ def check_auth(request):
         'user': user_obj if authorized else {},
         'allowed_pages': allowed_pages if authorized else []
     }
-
-    refill_db(production=False)
-    # download_all_stops(production=False)
 
     return JsonResponse(auth)

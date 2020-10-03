@@ -1,6 +1,7 @@
 from .general_review import GeneralReview
 
-class Science:
+
+class Mercury:
     def __init__(self):
         self.res = {}
         self.gr = GeneralReview()

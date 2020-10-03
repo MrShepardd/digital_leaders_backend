@@ -11,7 +11,7 @@ from .db_utilities.crowded_place_filler import CrowdedPlaceFiller
 from .db_utilities.atm_filler import AtmFiller
 from .db_utilities.atm_crowded_place_filler import AtmCrowdedPlaceFiller
 
-from .science.general_review import GeneralReview
+from .mercury.general_review import GeneralReview
 
 import pickle
 import pandas as pd
