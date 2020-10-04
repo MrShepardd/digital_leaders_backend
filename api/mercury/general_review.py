@@ -4,10 +4,12 @@ import os
 import datetime
 import numpy as N
 from django.db.models import Sum
-from ..models import ATM, Bank, AtmCrowdedPlace, PeopleFlow, Polygon
+from ..models import ATM, Bank, AtmCrowdedPlace, PeopleFlow, Polygon, CrowdedPlace
 import json
 from haversine import haversine
 from shapely import wkt
+from shapely import geometry
+from shapely.ops import cascaded_union
 
 
 def get_format_distance(distance, measure):
@@ -52,17 +54,73 @@ class GeneralReview:
 
     def make_precalculation(self):
         obj = self.construct_people_flow_object()
+        obj.update(self.construct_predict_polygons_object())
         os.makedirs(os.path.dirname(self.filename), exist_ok=True)
         with open(self.filename, 'wb') as f:
             pickle.dump(obj, f)
+
+    def get_cluster_polygons(self):
+
+        res = []
+
+        polygons = {polygon.square_id: polygon.wkt_geo for polygon in Polygon.objects.all()}
+        work_list = {}
+        feature = 0.1
+
+        for polygon in self.data['proba_values']:
+            is_have_nearest_atm = False
+            poly_wkt = wkt.loads(polygons[polygon])
+            x, y = poly_wkt.centroid.coords.xy
+
+            for atm in self.atm:
+                if atm.bank.name == 'Газпромбанк':
+                    distance = haversine((atm.lon, atm.lat), (x[0], y[0]))
+                    if distance <= .8:
+                        is_have_nearest_atm = True
+                        break
+
+            if is_have_nearest_atm:
+                continue
+
+            if self.data['proba_values'][polygon] >= feature:
+                work_list[polygon] = self.data['proba_values'][polygon]
+
+        for polygon in work_list:
+            polygon_list = [wkt.loads(polygons[polygon])]
+
+            for i in range(-10, 10):
+                second_polygon = str(int(polygon) + i)
+
+                if second_polygon in work_list.keys():
+                    polygon_list.append(wkt.loads(polygons[second_polygon]))
+
+            u = cascaded_union(polygon_list)
+            bounds = []
+
+            if u.type == "MultiPolygon" and u.is_valid and len(polygons) > 1:
+                for item in u:
+                    gg_json = list(item.exterior.coords)
+                    for gg in gg_json:
+                        bounds.append([gg[0], gg[1]])
+            elif u.is_valid:
+                gg_json = list(u.exterior.coords)
+                for gg in gg_json:
+                    bounds.append([gg[0], gg[1]])
+
+            # res.append(bounds)
+
+            obj = get_feature_obj(polygon, 0, [bounds])
+            res.append(obj)
+
+        return res
 
     def get_atm_location(self):
         res = []
 
         for i in range(len(self.atm)):
 
-            if self.atm[i].bank != self.bank:
-                continue
+            # if self.atm[i].bank != self.bank:
+            #     continue
 
             obj = {
                 'id': i,
@@ -158,10 +216,23 @@ class GeneralReview:
         return obj
 
     def construct_predict_polygons_object(self):
-        obj = {}
+        obj = {'proba_values': {}}
+
+        polygons = {polygon.square_id: polygon.wkt_geo for polygon in Polygon.objects.all()}
+
+        polygon_places = {}
+        for place in CrowdedPlace.objects.all():
+            square_id = place.square_id.square_id
+            if square_id not in polygon_places:
+                polygon_places[square_id] = []
+
+            polygon_places[square_id].append(place)
 
         max_values = {}
-        weight = 0.4
+        categories_weights = {
+            'people_flow': 0.8,
+            'bus_stop': 0.6
+        }
 
         for time in self.data['people_flow']:
             max_value = -100
@@ -180,21 +251,40 @@ class GeneralReview:
                 scores[time] = {}
 
             for polygon in self.data['people_flow'][time]:
-                scores[time][polygon] = self.data['people_flow'][time][polygon]['sum'] / max_value * weight
+                scores[time][polygon] = self.data['people_flow'][time][polygon]['sum'] / max_value * categories_weights['people_flow']
 
         res = {}
 
-        ind = 1
-
         for time in scores:
-            ind = 1
             for polygon in scores[time]:
-                ind += 1
-                res[polygon] = res[polygon] + scores[time][polygon] if polygon in res else scores[time][polygon]
+
+                if polygon not in res:
+                    res[polygon] = {
+                        'people_flow_sum': 0,
+                        'people_flow_count': 0,
+                        'people_flow_value': 0.0,
+                        'bus_stop_sum': 0,
+                        'bus_stop_count': 0,
+                        'bus_stop_value': 0.0,
+                        'total': 0.0
+                    }
+
+                res[polygon]['people_flow_sum'] += scores[time][polygon]
+                res[polygon]['people_flow_count'] += 1
 
         for polygon in res:
-            res[polygon] /= ind
+            places = polygon_places[polygon] if polygon in polygon_places.keys() else []
 
-        print(res)
+            for place in places:
+                weight = categories_weights[place.type]
+                res[polygon]['bus_stop_sum'] += weight
+                res[polygon]['bus_stop_count'] += 1
+
+        for polygon in res:
+            res[polygon]['people_flow_value'] = res[polygon]['people_flow_sum'] / res[polygon]['people_flow_count'] if res[polygon]['people_flow_count'] != 0 else 0.0
+            res[polygon]['bus_stop_value'] = res[polygon]['bus_stop_sum'] / res[polygon]['bus_stop_count'] if res[polygon]['bus_stop_count'] != 0 else 0.0
+
+            res[polygon]['total'] = (res[polygon]['people_flow_value'] + res[polygon]['bus_stop_value']) / 2
+            obj['proba_values'][polygon] = res[polygon]['total']
 
         return obj

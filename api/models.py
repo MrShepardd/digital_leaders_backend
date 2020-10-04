@@ -5,33 +5,6 @@ class Bank(models.Model):
     name = models.CharField(max_length=200)
 
 
-class CrowdedPlace(models.Model):
-    name = models.CharField(max_length=200)
-    type = models.CharField(max_length=200)
-    address = models.CharField(max_length=200)
-    gis_id = models.CharField(max_length=200)
-    lat = models.FloatField(default=-1.0)
-    lon = models.FloatField(default=-1.0)
-
-
-class ATM(models.Model):
-    gis_id = models.CharField(max_length=200)
-    name = models.CharField(max_length=200)
-    bank = models.ForeignKey(Bank, on_delete=models.CASCADE, default=0)
-    address = models.CharField(max_length=200)
-    lat = models.FloatField(default=-1.0)
-    lon = models.FloatField(default=-1.0)
-    schedule = models.TextField(default="")
-
-
-class AtmCrowdedPlace(models.Model):
-    id_atm = models.ForeignKey(ATM, on_delete=models.CASCADE, default=0)
-    id_place = models.ForeignKey(CrowdedPlace, on_delete=models.CASCADE, default=0)
-    distance = models.FloatField(default=0.0)
-    measure = models.CharField(max_length=200)
-    multi_line_string = models.TextField(default="")
-
-
 class District(models.Model):
     name = models.CharField(max_length=200)
     gis_id = models.CharField(max_length=200)
@@ -46,6 +19,34 @@ class Polygon(models.Model):
     square_id = models.CharField(max_length=200)
     district = models.ForeignKey(District, on_delete=models.CASCADE, default=0)
     wkt_geo = models.TextField(default="")
+
+
+class ATM(models.Model):
+    gis_id = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
+    bank = models.ForeignKey(Bank, on_delete=models.CASCADE, default=0)
+    address = models.CharField(max_length=200)
+    lat = models.FloatField(default=-1.0)
+    lon = models.FloatField(default=-1.0)
+    schedule = models.TextField(default="")
+
+
+class CrowdedPlace(models.Model):
+    name = models.CharField(max_length=200)
+    type = models.CharField(max_length=200)
+    square_id = models.ForeignKey(Polygon, on_delete=models.CASCADE, default=0)
+    address = models.CharField(max_length=200)
+    gis_id = models.CharField(max_length=200)
+    lat = models.FloatField(default=-1.0)
+    lon = models.FloatField(default=-1.0)
+
+
+class AtmCrowdedPlace(models.Model):
+    id_atm = models.ForeignKey(ATM, on_delete=models.CASCADE, default=0)
+    id_place = models.ForeignKey(CrowdedPlace, on_delete=models.CASCADE, default=0)
+    distance = models.FloatField(default=0.0)
+    measure = models.CharField(max_length=200)
+    multi_line_string = models.TextField(default="")
 
 
 class PeopleFlow(models.Model):
