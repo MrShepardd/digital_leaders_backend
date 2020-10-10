@@ -1,0 +1,3 @@
+[submodule "backend/gis_mercury"]
+	path = backend/gis_mercury
+	url = https://github.com/MrShepardd/gis_mercury
