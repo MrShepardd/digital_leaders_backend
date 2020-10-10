@@ -1,7 +1,7 @@
-from backend.scopus_fefu import gis_atm_downloader as gad
-from backend.scopus_fefu import yandex_atm_downloader as yad
-from backend.scopus_fefu import yandex_district_downloader as ydd
-from backend.scopus_fefu import yandex_stops_downloader as ysd
+from backend.gis_mercury import gis_atm_downloader as gad
+from backend.gis_mercury import yandex_atm_downloader as yad
+from backend.gis_mercury import yandex_district_downloader as ydd
+from backend.gis_mercury import yandex_stops_downloader as ysd
 from django.http import HttpResponse
 
 from .db_utilities.db_filler import DBFiller
