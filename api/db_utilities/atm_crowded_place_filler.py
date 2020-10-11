@@ -13,8 +13,9 @@ def construct_atm_crowded_place(id_atm, id_place, multi_line_string, distance, m
 
 
 class AtmCrowdedPlaceFiller:
-    def __init__(self, path='data/stops.xlsx', prefix=''):
-        with open(prefix + 'data/atm_crowded_place.dictionary', 'rb') as file:
+    def __init__(self, path='data/atm_crowded_place.dictionary', prefix=''):
+        self.path = path
+        with open(prefix + self.path, 'rb') as file:
             self.crowded_places = pickle.load(file)
 
     def refill(self):
