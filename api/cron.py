@@ -1,7 +1,7 @@
 from backend.gis_mercury import gis_atm_downloader as gad
 from backend.gis_mercury import yandex_atm_downloader as yad
 from backend.gis_mercury import yandex_district_downloader as ydd
-from backend.gis_mercury import yandex_stops_downloader as ysd
+from backend.gis_mercury import yandex_crowded_place_downloader as ycpd
 from django.http import HttpResponse
 
 from .db_utilities.db_filler import DBFiller
@@ -39,24 +39,24 @@ def get_prefix_and_date(production):
     return prefix, str_date
 
 
-def download_all_stops(production=True):
-    print(str(datetime.datetime.now()) + '; start: download_all_atms')
+def download_all_crowded_place(production=True):
+    print(str(datetime.datetime.now()) + '; start: download_all_crowded_place')
 
     prefix, str_date = get_prefix_and_date(production)
     create_backup_directory(prefix + 'data/', str_date)
 
-    with open('data/stops-yandex.txt') as f:
-        stop_list = [line.split() for line in f]
+    with open('data/crowded_places.txt') as f:
+        cp_list = [line.split() for line in f]
 
-    stops = [item for sublist in stop_list for item in sublist]
+    crowded_places = [item for sublist in cp_list for item in sublist]
 
-    dd = ysd.StopDownloader(stops=stops)
-    dd.download_stop()
+    cpd = ycpd.CrowdedPlaceDownloader(crowded_places=crowded_places)
+    cpd.download_cp()
 
-    dd.save_to_file(name=prefix + 'data/stops.xlsx')
-    dd.save_to_file(name=prefix + 'data/snapshots/' + str_date + '/stops.xlsx')
+    cpd.save_to_file(name=prefix + 'data/crowded_places.xlsx')
+    cpd.save_to_file(name=prefix + 'data/snapshots/' + str_date + '/crowded_places.xlsx')
 
-    print(str(datetime.datetime.now()) + '; end: download_all_stops')
+    print(str(datetime.datetime.now()) + '; end: download_all_crowded_place')
 
     return HttpResponse("Hello, world. You're at the polls index.")
 

@@ -11,7 +11,7 @@ def construct_crowded_place(row, polygon):
         name=row['name'],
         gis_id=row['gis_id'],
         square_id=polygon,
-        type=row['place_type'],
+        type=row['type'],
         address=row['address'],
         lat=float(get_nan_value(row['lat'], '-1.0')),
         lon=float(get_nan_value(row['lon'], '-1.0'))
@@ -33,7 +33,7 @@ class CrowdedPlaceFiller:
             if i % 100 == 0:
                 print(i)
 
-            square_id = str(v['square_id'])[: -2]
+            square_id = str(v['square_id'])
 
             if square_id in polygons.keys():
                 polygon = polygons[square_id]
